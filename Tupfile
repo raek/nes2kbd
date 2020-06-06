@@ -1,0 +1,18 @@
+.gitignore
+
+MCU = atmega32u4
+
+CFLAGS = -mmcu=$(MCU) -Os -DF_CPU=16000000ul -std=c99 -g -Werror -Wall -Wextra -pedantic -Wno-error=unused-variable
+
+!cc   = |> ^ CC %o^    avr-gcc $(CFLAGS) -c %f -o %o               |>
+!ld   = |> ^ LD %o^    avr-gcc $(CFLAGS)    %f -o %o               |>
+!ar   = |> ^ AR %o^    avr-gcc-ar crs %o %f                        |>
+!dis  = |> ^ DIS %o^   avr-objdump -d %f > %o                      |>
+!hex  = |> ^ HEX %o^   avr-objcopy -j .text -j .data -O ihex %f %o |>
+!size = |> ^ SIZE %o^  avr-size -C --mcu=$(MCU) %f > %o            |>
+
+: foreach *.c |> !cc |> %B.o
+: *.o |> !ld |> nes2kbd.elf
+: nes2kbd.elf |> !dis |> nes2kbd.s
+: nes2kbd.elf |> !hex |> nes2kbd.hex
+: nes2kbd.elf |> !size |> nes2kbd.size
